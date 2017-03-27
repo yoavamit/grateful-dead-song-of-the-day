@@ -1,0 +1,11 @@
+{
+	"intents": [{
+		"intent": "GetGratefulDeadSong"
+	},
+	{
+		"intent": "AMAZON.PauseIntent"
+	},
+	{
+		"intent": "AMAZON.ResumeIntent"
+	}]
+}

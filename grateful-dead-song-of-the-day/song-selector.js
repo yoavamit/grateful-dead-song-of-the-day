@@ -110,9 +110,21 @@ function getSongOfTheDay(intent, session, callback) {
 	
 	let mySelector = new SongSelector();
 	mySelector.getRandomSong().then(info => {
-		let speechOutput = "From the " + info.showName + " show, the ong of the day is " + info.title;
+		let speechOutput = "From the " + info.showName + " show, the song of the day is " + info.title;
 		let shouldEndSession = true;
 		let response = buildSpeechletResponse(cardTitle, speechOutput, "Jerry On!", shouldEndSession);
+		response.directives = [];
+		response.directives.push({
+			"type": "AudioPlayer.Play",
+			"playBehavior": "ENQUEUE",
+			"audioItem": {
+				"stream": {
+					"url": info.link,
+					"token": info.title,
+					"offsetInMilliseconds": 0
+				}
+			}
+		});
 		callback({}, response);
 	});
 }
@@ -126,7 +138,8 @@ function buildResponse(sessionAttributes, speechletResponse) {
 }
 
 function getWelcomeResponse(callback) {
-    // If we wanted to initialize the session to have some attributes we could add those here.
+    // If we wanted to initialize the session to have some attributes we could
+	// add those here.
     const sessionAttributes = {};
     const cardTitle = 'Welcome';
     const speechOutput = 'Welcome to the grateful dead song of the day skill. ' +
@@ -176,6 +189,25 @@ function onIntent(intentRequest, session, callback) {
     // Dispatch to your skill's intent handlers
     if (intentName === 'GetGratefulDeadSong') {
     	getSongOfTheDay(intent, session, callback);
+    } else if (intentName === 'AMAZON.PauseIntent') {
+    	callback({}, {
+    		outputSpeech: {
+    			type: 'PlainText',
+    			text: null,
+    		},
+    		reprompt: {
+    			outputSpeech: {
+    				type: 'PlainText',
+    				text: null,
+    			},
+    		},
+    		directives: [
+    			{
+    				type: "AudioPlayer.Stop"
+    			}
+    		],
+    		shouldEndSession: true,
+    	});
     } else if (intentName === 'AMAZON.HelpIntent') {
         getWelcomeResponse(callback);
     } else if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent') {
